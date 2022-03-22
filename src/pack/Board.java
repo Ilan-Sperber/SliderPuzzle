@@ -99,9 +99,18 @@ public class Board {
 
     }
 
-//    public Board twin() {
-//
-//    }
+    public Board twin() {  
+        int[][] newTiles = Arrays.copyOf(tiles, tiles.length);
+        int row = dimension() - 1;
+        int col = dimension();
+        int swapRow = ThreadLocalRandom.current().nextInt(row + 1);
+        int swapCol = ThreadLocalRandom.current().nextInt(col + 1);
+        int temp = newTiles[swapRow][swapCol];
+        newTiles[swapRow][swapCol] = newTiles[row][col];
+        newTiles[row][col] = temp;
+        Board newBoard = new Board(newTiles);
+        return newBoard;
+   }
 
     @Override
     public String toString() {
