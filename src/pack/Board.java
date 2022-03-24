@@ -5,16 +5,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static utils.Utils.pad;
+import static utils.Utils.swap;
 
 public class Board {
     private final int[][] tiles;
 
     public Board(int[][] tiles) {
         if (tiles.length != tiles[0].length) throw new IllegalArgumentException("Board must be square");
-        this.tiles = tiles.clone();
+        this.tiles = new int[tiles.length][tiles.length];
+        for (int row = 0; row < tiles.length; row++) {
+            System.arraycopy(tiles[row], 0, this.tiles[row], 0, tiles.length);
+        }
     }
 
     /** Creates a new random n * n board */
@@ -31,9 +34,7 @@ public class Board {
                 int swapRow = ThreadLocalRandom.current().nextInt(row + 1);
                 int swapCol = ThreadLocalRandom.current().nextInt(col + 1);
 
-                int temp = tiles[swapRow][swapCol];
-                tiles[swapRow][swapCol] = tiles[row][col];
-                tiles[row][col] = temp;
+                swap(tiles, swapRow, swapCol, row, col);
             }
         }
     }
@@ -65,7 +66,6 @@ public class Board {
         for (int row = 0; row < dimension(); row++) {
             for (int col = 0; col < dimension(); col++) {
                 int tile = tiles[row][col] - 1;
-//                int targetFlat = (tile + 1) * dimension() + col;
                 int targetRow = tile / dimension();
                 int targetCol = tile % dimension();
 
@@ -90,15 +90,47 @@ public class Board {
 
     public Iterable<Board> neighbors() {
         List<Board> boards = new LinkedList<>();
-        int zero = Arrays.stream(tiles)
-                .flatMapToInt(Arrays::stream)
-                .boxed().toList()
-                .indexOf(0);
-        int zeRow = zero / dimension();
-        int zeCol = zero % dimension();
 
+        int zeRow = -1; // haha get it get it??
+        int zeCol = -1;
+
+        int[][] copy = new int[dimension()][dimension()];
+        for (int row = 0; row < dimension(); row++) {
+            for (int col = 0; col < dimension(); col++) {
+                int tile = tiles[row][col];
+                copy[row][col] = tile;
+                if (tile == 0) {
+                    zeRow = row;
+                    zeCol = col;
+                }
+            }
+        }
+
+        assert zeRow >= 0 && zeRow <= dimension() && zeCol >= 0 && zeCol <= dimension();
+
+        if (zeRow > 0) {
+            swap(copy, zeRow, zeCol, zeRow - 1, zeCol);
+            boards.add(new Board(copy));
+            swap(copy, zeRow, zeCol, zeRow - 1, zeCol);
+        }
+        if (zeRow < dimension() - 1) {
+            swap(copy, zeRow, zeCol, zeRow + 1, zeCol);
+            boards.add(new Board(copy));
+            swap(copy, zeRow, zeCol, zeRow + 1, zeCol);
+        }
+        if (zeCol > 0) {
+            swap(copy, zeRow, zeCol, zeRow, zeCol - 1);
+            boards.add(new Board(copy));
+            swap(copy, zeRow, zeCol, zeRow + 1, zeCol - 1);
+        }
+        if (zeCol < dimension() - 1) {
+            swap(copy, zeRow, zeCol, zeRow + 1, zeCol);
+            boards.add(new Board(copy));
+        }
+
+        return boards;
     }
-
+    
     public Board twin() {  
         int[][] newTiles = Arrays.copyOf(tiles, tiles.length);
         int row = dimension() - 1;
