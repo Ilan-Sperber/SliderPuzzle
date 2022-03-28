@@ -121,7 +121,7 @@ public class Board {
         if (zeCol > 0) {
             swap(copy, zeRow, zeCol, zeRow, zeCol - 1);
             boards.add(new Board(copy));
-            swap(copy, zeRow, zeCol, zeRow + 1, zeCol - 1);
+            swap(copy, zeRow, zeCol, zeRow, zeCol - 1);
         }
         if (zeCol < dimension() - 1) {
             swap(copy, zeRow, zeCol, zeRow + 1, zeCol);
@@ -130,18 +130,29 @@ public class Board {
 
         return boards;
     }
-    
+
     public Board twin() {  
-        int[][] newTiles = Arrays.copyOf(tiles, tiles.length);
-        int row = dimension() - 1;
-        int col = dimension();
-        int swapRow = ThreadLocalRandom.current().nextInt(row + 1);
-        int swapCol = ThreadLocalRandom.current().nextInt(col + 1);
-        int temp = newTiles[swapRow][swapCol];
-        newTiles[swapRow][swapCol] = newTiles[row][col];
-        newTiles[row][col] = temp;
-        Board newBoard = new Board(newTiles);
-        return newBoard;
+//        int[][] newTiles = Arrays.copyOf(tiles, tiles.length);
+//        int row = dimension() - 1;
+//        int col = dimension();
+//        int swapRow = ThreadLocalRandom.current().nextInt(row + 1);
+//        int swapCol = ThreadLocalRandom.current().nextInt(col + 1);
+//        int temp = newTiles[swapRow][swapCol];
+//        newTiles[swapRow][swapCol] = newTiles[row][col];
+//        newTiles[row][col] = temp;
+//        return new Board(newTiles);
+        int[][] copy = new int[dimension()][dimension()];
+        for (int row = 0; row < copy.length; row++) {
+            System.arraycopy(tiles[row], 0, copy[row], 0, copy.length);
+        }
+
+        if (copy[0][0] == 0 || copy[0][1] == 0) {
+            swap(copy, 1, 0, 1, 1);
+        } else {
+            swap(copy, 0, 0, 0, 1);
+        }
+
+        return new Board(copy);
    }
 
     @Override
